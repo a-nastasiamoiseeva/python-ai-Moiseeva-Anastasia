@@ -1,0 +1,29 @@
+# Получает список книг жанра фэнтези, выпущенных с 1974 по 1980 годы, с указанием автора, издательства, страны,
+# года публикации и языка. Жанр фиксирован как "фэнтези" (Q132311).
+
+SELECT DISTINCT
+  ?bookLabel                                   # Название книги
+  ?authorLabel                                 # Автор
+  ?publisherLabel                              # Издательство
+  ?countryLabel                                # Страна издательства
+  (YEAR(?pubDate) AS ?year)                     # Год публикации
+  ?languageLabel                               # Язык
+WHERE {
+  ?book wdt:P31 wd:Q7725634;                   # Литературное произведение
+        wdt:P136 wd:Q132311;                  # Жанр: фэнтези (фиксированно)
+        wdt:P50 ?author;                      # Автор
+        wdt:P123 ?publisher;                  # Издательство
+        wdt:P577 ?pubDate.                    # Дата публикации
+
+  FILTER(YEAR(?pubDate) >= 1974 && YEAR(?pubDate) <= 1980)  # Фильтр по годам выпуска: 1974–1980
+
+  OPTIONAL { ?book wdt:P407 ?language. }       # Язык (опционально)
+
+  OPTIONAL {
+    ?publisher wdt:P159 ?location.            # Местонахождение издательства (опционально)
+    ?location wdt:P17 ?country.               # Страна (опционально)
+  }
+
+  # Метки для ...Label (с mul для избежания безымянных объектов)
+  SERVICE wikibase:label { bd:serviceParam wikibase:language "ru,en,mul". }
+}
